@@ -1,0 +1,52 @@
+# SciResearcher Configuration File
+
+# API配置 - 使用API模式，无需本地部署模型
+api:
+  # OpenAI兼容API (支持Qwen, GPT等)
+  base_url: "https://dashscope.aliyuncs.com/compatible-mode/v1"  # 阿里云百炼API
+  api_key: "${DASHSCOPE_API_KEY}"  # 从环境变量读取
+
+  # 模型配置
+  models:
+    planner: "qwen-plus"                    # 任务规划模型
+    reasoner: "qwen-plus"                   # 推理生成模型
+    reviewer: "qwen-turbo"                  # 审核模型(可以用更快的)
+    embedding: "text-embedding-v3"          # Qwen3 Embedding模型
+    vision: "qwen-vl-max"                   # Qwen-VL视觉理解模型
+
+# PDF解析配置
+pdf_parser:
+  output_dir: "./data/processed"
+  extract_images: true
+  extract_tables: true
+  extract_formulas: true
+
+# 向量数据库配置
+vector_db:
+  type: "faiss"  # 或 "chromadb", "milvus"
+  index_path: "./data/vector_index"
+  dimension: 1536
+
+# 检索配置
+retrieval:
+  top_k: 5
+  chunk_size: 500
+  chunk_overlap: 50
+  min_similarity: 0.3
+
+# Agent配置
+agents:
+  max_iterations: 3
+  confidence_threshold: 0.7
+  timeout: 300  # 秒
+
+# 缓存配置
+cache:
+  enabled: true
+  dir: "./data/cache"
+  ttl: 86400  # 24小时
+
+# 日志配置
+logging:
+  level: "INFO"
+  file: "./logs/sciresearcher.log"
