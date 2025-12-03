@@ -59,8 +59,8 @@ class SciResearcher:
         print(f"\n[1/3] 初始化 Qwen3 模型: {model_name}")
         self.model = LiteLLMModel(
             model_id=f"openai/{model_name}",
-            api_key=os.getenv("DASHSCOPE_API_KEY"),
-            api_base="https://dashscope.aliyuncs.com/compatible-mode/v1"
+            api_key=os.getenv("MODELSCOPE_API_KEY"),
+            api_base=os.getenv("MODELSCOPE_BASE_URL")
         )
         print("✓ Qwen3 模型初始化完成")
 
@@ -100,11 +100,11 @@ class SciResearcher:
     def _check_api_keys(self):
         """检查必需的 API 密钥"""
         required_keys = {
-            "DASHSCOPE_API_KEY": "阿里云百炼 API (用于 Qwen3 系列模型)"
+            "MODELSCOPE_API_KEY": "魔搭 API (用于 Qwen 系列模型)"
         }
 
         optional_keys = {
-            "MINERU_API_KEY": "MinerU API (用于 PDF 解析, 可选)"
+            "MINERU_API_TOKEN": "MinerU API (用于 PDF 解析, 可选)"
         }
 
         missing_required = []

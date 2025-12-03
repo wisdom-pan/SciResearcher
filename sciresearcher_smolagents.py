@@ -4,9 +4,10 @@
 """
 import os
 from pathlib import Path
-from smolagents import CodeAgent, ToolCallingAgent, HfApiModel, LiteLLMModel
+from smolagents import CodeAgent, ToolCallingAgent, LiteLLMModel
 from tools.smolagents_tools import (
     parse_pdf,
+    download_mineru_result,
     index_text,
     search_knowledge,
     understand_image,
@@ -37,28 +38,29 @@ class SciResearcherAgent:
         print("=" * 70)
 
         # 检查API密钥
-        api_key = os.getenv("DASHSCOPE_API_KEY")
+        api_key = os.getenv("MODELSCOPE_API_KEY")
         if not api_key:
             raise ValueError(
-                "请设置环境变量 DASHSCOPE_API_KEY\n"
+                "请设置环境变量 MODELSCOPE_API_KEY\n"
                 "获取地址: https://dashscope.console.aliyun.com/apiKey"
             )
 
         print(f"\n初始化模型: {model_name}")
 
-        # 初始化Qwen模型 (通过LiteLLM支持阿里云百炼API)
+        # 初始化Qwen模型 (通过LiteLLM支持魔搭API)
         self.model = LiteLLMModel(
             model_id=f"openai/{model_name}",  # LiteLLM格式
             api_key=api_key,
-            api_base="https://dashscope.aliyuncs.com/compatible-mode/v1"
+            api_base=os.getenv("MODELSCOPE_BASE_URL")
         )
 
         # 准备工具列表
         tools = [
             process_and_index_pdf,
+            parse_pdf,
+            download_mineru_result,
             search_knowledge,
             understand_image,
-            parse_pdf,
             index_text
         ]
 
