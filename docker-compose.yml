@@ -1,42 +1,20 @@
-version: '3.8'
-
 services:
   sciresearcher:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: sciresearcher
+    build: .
     image: sciresearcher:latest
+    container_name: sciresearcher
 
-    # 环境变量
     environment:
-      - DASHSCOPE_API_KEY=${DASHSCOPE_API_KEY}
-      - PYTHONUNBUFFERED=1
+      - MODELSCOPE_BASE_URL=${MODELSCOPE_BASE_URL:-https://api-inference.modelscope.cn/v1}
+      - MODELSCOPE_API_KEY=${MODELSCOPE_API_KEY}
+      - MINERU_API_TOKEN=${MINERU_API_TOKEN}
 
-    # 挂载卷 (持久化数据)
     volumes:
       - ./data:/app/data
       - ./logs:/app/logs
-      - ./config:/app/config
 
-    # 交互式终端
+    ports:
+      - "7860:7860"  # Gradio Web端口
+
     stdin_open: true
     tty: true
-
-    # 网络
-    networks:
-      - sciresearcher_network
-
-    # 资源限制 (可选)
-    deploy:
-      resources:
-        limits:
-          cpus: '4'
-          memory: 8G
-        reservations:
-          cpus: '2'
-          memory: 4G
-
-networks:
-  sciresearcher_network:
-    driver: bridge
