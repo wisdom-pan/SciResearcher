@@ -1,0 +1,13 @@
+---
+title: SciResearcher
+description: 基于 smolagents + MinerU API + ChromaDB 的科研文献深度理解框架
+sdk: gradio
+tags:
+  - research
+  - ai
+  - nlp
+  - pdf
+  - document-analysis
+cpu: 2
+memory: 4
+gpu: 0
