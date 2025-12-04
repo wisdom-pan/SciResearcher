@@ -6,6 +6,18 @@
 [![smolagents](https://img.shields.io/badge/smolagents-1.0+-green.svg)](https://github.com/huggingface/smolagents)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Gradio](https://img.shields.io/badge/Gradio-Web_UI-orange.svg)](https://gradio.app/)
+[![Docker](https://img.shields.io/badge/Docker-Ready-blue.svg)](https://www.docker.com/)
+
+## 📋 目录
+
+- [快速开始](#快速开始)
+- [Docker部署](#docker-部署)
+- [本地安装](#本地安装)
+- [Web界面功能](#web-界面功能)
+- [API配置](#api-配置)
+- [项目结构](#项目结构)
+- [详细使用指南](#详细使用指南)
+- [故障排除](#故障排除)
 
 ## 项目简介
 
@@ -72,27 +84,68 @@ SciResearcher 是专为科研工作者设计的轻量、开源、可验证的 AI
 
 ## 快速开始
 
-### 方式一：Docker 部署（推荐）
+### 🐳 方式一：Docker 部署（推荐）
 
+使用 Docker 快速启动 SciResearcher，无需手动安装依赖！
+
+#### 前置条件
+- Docker [下载地址](https://www.docker.com/products/docker-desktop)
+- Docker Compose [下载地址](https://docs.docker.com/compose/install/)
+
+#### 部署步骤
+
+1. **克隆项目**
 ```bash
-# 1. 克隆项目
 git clone https://github.com/your-repo/SciResearcher.git
 cd SciResearcher
-
-# 2. 配置环境变量
-cp .env.example .env
-# 编辑 .env 文件，填入以下配置:
-# - MODELSCOPE_API_KEY: 魔搭API密钥
-# - MINERU_API_TOKEN: MinerU API Token
-
-# 3. 使用 Docker Compose 启动
-docker-compose up -d
-
-# 4. 访问 Web 界面
-# 打开浏览器访问: http://localhost:7860
 ```
 
-### 方式二：本地安装
+2. **配置环境变量**
+```bash
+cp .env.example .env
+```
+编辑 `.env` 文件，填入您的API密钥：
+```bash
+MODELSCOPE_API_KEY=您的魔搭API密钥
+MINERU_API_TOKEN=您的MinerU Token
+```
+
+3. **使用 Docker Compose 启动**
+```bash
+# 构建并启动所有服务
+docker-compose up -d
+
+# 或仅启动Web应用
+docker-compose up --build -d
+```
+
+4. **访问应用**
+打开浏览器访问: http://localhost:7860
+
+#### Docker 命令
+
+```bash
+# 构建镜像
+docker build -t sciresearcher .
+
+# 运行容器
+docker run -d \
+  --name sciresearcher \
+  -p 7860:7860 \
+  -v $(pwd)/data:/app/data \
+  -v $(pwd)/.env:/app/.env \
+  sciresearcher
+
+# 查看日志
+docker logs -f sciresearcher
+
+# 停止容器
+docker-compose down
+```
+
+### 💻 方式二：本地安装
+
+如果不想使用Docker，可以直接本地安装：
 
 ```bash
 # 1. 创建虚拟环境
@@ -272,19 +325,38 @@ MINERU_API_TOKEN=your_token
 
 ```
 SciResearcher/
-├── gradio_app.py                # Web 界面入口
+├── app.py                      # Docker 入口点
+├── gradio_app.py               # Web 界面主程序
 ├── tools/
 │   ├── smolagents_tools.py      # MinerU 工具
 │   └── vector_db_chroma.py      # ChromaDB 向量库
 ├── config/
 │   └── config.yaml             # 配置文件
-├── data/
-│   └── chromadb/               # ChromaDB 数据
-├── Dockerfile                   # Docker 镜像
-├── docker-compose.yml          # Docker Compose 配置
-├── requirements.txt            # Python 依赖
+├── data/                        # 数据存储目录
+│   ├── chromadb/               # ChromaDB 向量库数据
+│   ├── uploads/                # 上传的PDF文件
+│   └── logs/                   # 应用日志
+├── Dockerfile                   # Docker 镜像构建文件
+├── docker-compose.yml          # Docker Compose 编排配置
+├── requirements.txt            # Python 依赖列表
+├── .env.example               # 环境变量模板
 └── README.md                   # 本文档
 ```
+
+## 🐳 Docker 部署说明
+
+### Dockerfile 配置
+- 基于 `modelscope/python:3.10` 镜像
+- 自动安装依赖
+- 暴露 7860 端口
+- 使用 `app.py` 作为启动入口
+
+### Docker Compose 服务
+- **sciresearcher**: 主应用服务
+  - 构建: `./` 目录
+  - 端口映射: `7860:7860`
+  - 环境变量: 从 `.env` 文件读取
+  - 数据卷: 挂载 `./data` 和 `./logs` 目录
 
 ## 开发指南
 
@@ -415,13 +487,24 @@ python gradio_app.py
 
 ---
 
-## ⚡ 快速体验流程
+## ⚡ 快速体验流程（Docker部署）
 
 ```
-1️⃣ 获取API密钥 → 2️⃣ 启动应用 → 3️⃣ 配置API → 4️⃣ 上传PDF → 5️⃣ 智能问答
+1️⃣ 克隆项目 → 2️⃣ 配置.env → 3️⃣ docker-compose up → 4️⃣ 访问 http://localhost:7860 → 5️⃣ 上传PDF测试
 ```
 
-💡 **提示**: 首次使用建议先上传一篇较短的PDF文档进行测试，熟悉整个流程后再处理长文档。
+### 极简步骤（复制粘贴）
+
+```bash
+# 一键部署
+git clone https://github.com/your-repo/SciResearcher.git
+cd SciResearcher
+cp .env.example .env  # 编辑.env填入API密钥
+docker-compose up -d  # 启动
+# 访问 http://localhost:7860
+```
+
+💡 **提示**: 首次使用建议先上传一篇较短的PDF文档测试，确认所有功能正常后再处理长文档。
 
 ---
 
@@ -441,11 +524,17 @@ A: 尝试重新上传文档，或使用更具体的问题
 **Q: 处理速度慢？**
 A: 大文档需要更长时间，请耐心等待。可查看进度日志了解状态。
 
-**Q: 创空间构建失败？**
-A: 检查requirements.txt中依赖是否完整，查看构建日志定位问题
+**Q: Docker容器启动失败？**
+A: 检查Docker是否正常运行，执行 `docker version` 确认
 
-**Q: 忘记Git LFS导致大文件上传失败？**
-A: 运行 `git lfs install` 并重新提交
+**Q: Docker Compose无法启动？**
+A: 检查端口7860是否被占用，或尝试执行 `docker-compose down` 停止后重新启动
+
+**Q: 容器内部错误？**
+A: 查看容器日志执行 `docker logs sciresearcher`
+
+**Q: 数据卷未挂载？**
+A: 确保 `.env` 文件存在且配置正确，检查 data/ 目录权限
 
 ### 💡 API密钥获取指南
 
