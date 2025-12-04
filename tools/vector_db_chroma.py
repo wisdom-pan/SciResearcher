@@ -36,24 +36,40 @@ class VectorDB:
         )
 
     def embed_text(self, text: str) -> List[float]:
-        """使用魔搭API生成文本向量"""
-        if not self.openai_client:
-            print("警告: OpenAI客户端未初始化")
-            # 返回随机向量作为fallback
-            import random
-            return [random.random() for _ in range(1536)]
+        """使用本地Qwen3-Embedding-0.6B模型生成文本向量"""
+        # 检查本地模型是否已初始化
+        if not hasattr(self, '_local_model'):
+            try:
+                print("🔄 正在加载本地Embedding模型 (Qwen3-Embedding-0.6B)...")
+                from sentence_transformers import SentenceTransformer
+
+                # 尝试从ModelScope下载模型
+                try:
+                    from modelscope import snapshot_download
+                    model_dir = snapshot_download('Qwen/Qwen3-Embedding-0.6B')
+                    print(f"✅ 模型已下载到: {model_dir}")
+                    self._local_model = SentenceTransformer(model_dir)
+                except:
+                    # 如果ModelScope失败，使用HuggingFace
+                    print("⚠️ ModelScope下载失败，尝试使用HuggingFace...")
+                    self._local_model = SentenceTransformer("Qwen/Qwen3-Embedding-0.6B")
+
+                print("✅ 本地Embedding模型加载成功!")
+            except Exception as e:
+                print(f"⚠️ 本地模型加载失败，将使用随机向量: {e}")
+                # 返回随机向量作为fallback
+                import random
+                return [random.random() for _ in range(1024)]  # Qwen3-Embedding-0.6B的维度
 
         try:
-            response = self.openai_client.embeddings.create(
-                model="text-embedding-v3",
-                input=text
-            )
-            return response.data[0].embedding
+            # 使用本地模型生成嵌入
+            embedding = self._local_model.encode(text)
+            return embedding.tolist()
         except Exception as e:
-            print(f"嵌入生成失败: {e}")
+            print(f"本地嵌入生成失败: {e}")
             # 返回随机向量作为fallback
             import random
-            return [random.random() for _ in range(1536)]
+            return [random.random() for _ in range(1024)]
 
     def add_document(self, doc_id: str, content: str, metadata: Dict = None):
         """添加文档到数据库"""
@@ -67,9 +83,18 @@ class VectorDB:
         if not chunks:
             return False
 
-        # 为每个块生成嵌入
+        # 为每个块生成嵌入（添加延迟避免过载）
         print(f"正在为文档 '{doc_id}' 生成 {len(chunks)} 个嵌入...")
-        embeddings = [self.embed_text(chunk) for chunk in chunks]
+        import time
+        embeddings = []
+
+        for i, chunk in enumerate(chunks):
+            if i > 0 and i % 10 == 0:
+                print(f"  已处理 {i}/{len(chunks)} 块...")
+                time.sleep(0.1)  # 每10个块暂停0.1秒
+
+            embedding = self.embed_text(chunk)
+            embeddings.append(embedding)
 
         # 准备数据
         ids = [f"{doc_id}_{i}" for i in range(len(chunks))]

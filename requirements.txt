@@ -1,21 +1,26 @@
 # SciResearcher Requirements
 # 基于 smolagents + 魔搭API + MinerU API + Gradio + ChromaDB
 
-# 核心框架
 smolagents>=1.0.0
 litellm>=1.35.0
 
-# API 客户端
 requests>=2.31.0
 openai>=1.0.0
 
-# Web前端
+modelscope>=1.14.0
+
 gradio>=4.0.0
 
-# 向量数据库
 chromadb>=0.4.0
 
-# 基础依赖
+sentence-transformers>=2.7.0
+transformers>=4.51.0
+torch>=2.0.0
+accelerate>=0.20.0
+einops>=0.7.0
+scipy>=1.11.0
+scikit-learn>=1.3.0
+
 numpy>=1.24.0
 pillow>=10.0.0
 pyyaml>=6.0
