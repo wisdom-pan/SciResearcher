@@ -1,0 +1,51 @@
+# SciResearcher 部署配置文件模板
+# 复制此文件为 deploy_config.sh 并修改相应配置
+
+# ===========================
+# 🔑 必需配置
+# ===========================
+
+# 1. 魔搭访问Token（用于Git推送）
+# 获取地址：https://www.modelscope.cn/my/accesstoken
+MODELSCOPE_TOKEN="ms-xxxxxxxxxxxxxxxxxxxxxxxx"
+
+# 2. 魔搭用户名（登录后可在个人中心查看）
+# 例如：myusername
+USERNAME="your_username"
+
+# 3. 创空间项目名（创建创空间时设置的项目名）
+# 例如：MySciResearcher
+PROJECT_NAME="SciResearcher"
+
+# ===========================
+# 💡 额外配置（可选）
+# ===========================
+
+# 源项目路径（如果脚本不在项目根目录，需要指定）
+PROJECT_DIR="."
+
+# 是否使用主分支（大部分情况是master，有时可能是main）
+BRANCH="master"
+
+# ===========================
+# 📋 配置示例
+# ===========================
+
+# 示例1：标准配置
+# MODELSCOPE_TOKEN="ms-abc123def456ghi789"
+# USERNAME="johndoe"
+# PROJECT_NAME="MySciResearcherApp"
+
+# 示例2：中文用户名
+# MODELSCOPE_TOKEN="ms-xyz789abc123def456"
+# USERNAME="张三"
+# PROJECT_NAME="科研助手"
+
+# ===========================
+# ⚠️ 注意事项
+# ===========================
+
+# 1. 确保 MODELSCOPE_TOKEN 格式正确（以 ms- 开头）
+# 2. USERNAME 和 PROJECT_NAME 不要包含空格或特殊字符
+# 3. 配置完成后运行 ./deploy_to_studio.sh 进行部署
+# 4. 首次部署前请先阅读 README.md 中的详细说明
