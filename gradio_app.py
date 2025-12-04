@@ -23,15 +23,21 @@ class SciResearcherApp:
 
     def __init__(self):
         """初始化应用"""
-        self.client = OpenAI(
-            api_key=os.getenv("MODELSCOPE_API_KEY"),
-            base_url=os.getenv("MODELSCOPE_BASE_URL")
-        )
+        # 初始化OpenAI客户端，如果环境变量不存在则使用None
+        api_key = os.getenv("MODELSCOPE_API_KEY")
+        base_url = os.getenv("MODELSCOPE_BASE_URL")
+
+        if api_key and base_url:
+            self.client = OpenAI(api_key=api_key, base_url=base_url)
+        else:
+            self.client = None
+            print("⚠️ 未配置MODELSCOPE_API_KEY，请在界面中设置API密钥")
+
         self.current_doc_id = None
         # 临时存储用户自定义API配置（会话级）
         self.temp_api_config = {
-            "modelscope_key": None,
-            "modelscope_url": os.getenv("MODELSCOPE_BASE_URL"),
+            "modelscope_key": api_key,
+            "modelscope_url": base_url,
             "mineru_key": os.getenv("MINERU_API_TOKEN")
         }
 
@@ -325,14 +331,23 @@ class SciResearcherApp:
 💡 此步骤通常需要10-30秒
 """
 
-            response = self.client.chat.completions.create(
-                model="qwen-plus",
-                messages=[
-                    {"role": "user", "content": prompt}
-                ]
-            )
+            # 检查API客户端是否可用
+            if not self.client:
+                yield "❌ 错误：未配置API密钥，请在界面中设置MODELSCOPE_API_KEY"
+                return
 
-            answer = response.choices[0].message.content
+            try:
+                response = self.client.chat.completions.create(
+                    model="qwen-plus",
+                    messages=[
+                        {"role": "user", "content": prompt}
+                    ]
+                )
+
+                answer = response.choices[0].message.content
+            except Exception as e:
+                yield f"❌ API调用失败: {str(e)}"
+                return
 
             # 显示引用
             citations = []
@@ -438,14 +453,23 @@ class SciResearcherApp:
 
 请提供详细、深入的分析，并明确标注引用来源 [证据1] [证据2]。请用学术严谨但易于理解的语言撰写。"""
 
-            response = self.client.chat.completions.create(
-                model="qwen-plus",
-                messages=[
-                    {"role": "user", "content": prompt}
-                ]
-            )
+            # 检查API客户端是否可用
+            if not self.client:
+                yield "❌ 错误：未配置API密钥，请在界面中设置MODELSCOPE_API_KEY"
+                return
 
-            analysis = response.choices[0].message.content
+            try:
+                response = self.client.chat.completions.create(
+                    model="qwen-plus",
+                    messages=[
+                        {"role": "user", "content": prompt}
+                    ]
+                )
+
+                analysis = response.choices[0].message.content
+            except Exception as e:
+                yield f"❌ API调用失败: {str(e)}"
+                return
 
             yield f"""
 ✅ 第三步完成: 深度分析生成成功
